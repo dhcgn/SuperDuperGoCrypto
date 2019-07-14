@@ -11,14 +11,14 @@ import (
 
 func readKeyPairs(filePath string) (*KeyPairs, error) {
 	dat, _ := ioutil.ReadFile(filePath)
-	var user KeyPairs
-	if err := json.Unmarshal(dat, &user); err != nil {
+	var keyPairs KeyPairs
+	if err := json.Unmarshal(dat, &keyPairs); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &keyPairs, nil
 }
 
-func createKeyPairs(sidhKeyVariant sidh.KeyVariant) (user *KeyPairs, err error) {
+func createKeyPairs(sidhKeyVariant sidh.KeyVariant) (keyPairs *KeyPairs, err error) {
 	// sidh
 	privateKey := sidh.NewPrivateKey(sidhKeyId, sidhKeyVariant)
 	publicKey := sidh.NewPublicKey(sidhKeyId, sidhKeyVariant)
@@ -37,7 +37,7 @@ func createKeyPairs(sidhKeyVariant sidh.KeyVariant) (user *KeyPairs, err error) 
 	_, _ = io.ReadFull(rand.Reader, secret[:])
 	x448.KeyGen(&public, &secret)
 
-	user = &KeyPairs{
+	keyPairs = &KeyPairs{
 		Version: 1,
 		Sike: KeyPair{
 			Public:  publicKeyBytes,
@@ -48,5 +48,5 @@ func createKeyPairs(sidhKeyVariant sidh.KeyVariant) (user *KeyPairs, err error) 
 			Private: secret[:],
 		},
 	}
-	return user, nil
+	return keyPairs, nil
 }

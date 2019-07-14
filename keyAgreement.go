@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"crypto/sha512"
 	"fmt"
 	"github.com/cloudflare/circl/dh/sidh"
@@ -11,7 +10,7 @@ import (
 func createKeyAgreementAndEphemeral(public *KeyPairs) (*KeyPairs, []byte) {
 	privateEphemeral, _ := createKeyPairs(sidhKeyVariantB)
 	sharedX448 := CreateSharedX448(public.X448.Public, privateEphemeral.X448.Private)
-	sharedSidh := CreateSharedSidhFp751(public.Sike.Public, privateEphemeral.Sike.Private)
+	sharedSidh := CreateSharedSidhFp751(public.Sike.Public, sidhKeyVariantA, privateEphemeral.Sike.Private, sidhKeyVariantB)
 	// fmt.Println("sharedX448", base64.StdEncoding.EncodeToString(sharedX448))
 	// fmt.Println("sharedSidh", base64.StdEncoding.EncodeToString(sharedSidh))
 	shared := CreateSharedKey(sharedX448, sharedSidh)
@@ -20,9 +19,13 @@ func createKeyAgreementAndEphemeral(public *KeyPairs) (*KeyPairs, []byte) {
 	return privateEphemeral, shared
 }
 
-func createKeyAgreement(ephemeral *KeyPairs, private *KeyPairs) ([]byte) {
-
-	return nil
+func createKeyAgreement(ephemeral *KeyPairs, private *KeyPairs) []byte {
+	sharedX448 := CreateSharedX448(ephemeral.X448.Public, private.X448.Private)
+	sharedSidh := CreateSharedSidhFp751(ephemeral.Sike.Public, sidhKeyVariantB, private.Sike.Private, sidhKeyVariantA)
+	// fmt.Println("sharedX448", base64.StdEncoding.EncodeToString(sharedX448))
+	// fmt.Println("sharedSidh", base64.StdEncoding.EncodeToString(sharedSidh))
+	shared := CreateSharedKey(sharedX448, sharedSidh)
+	return shared
 }
 
 func CreateSharedKey(sharedKeys ...[]byte) (combinedKey []byte) {
@@ -65,15 +68,14 @@ func CreateSharedX448(public []byte, secret []byte) (sharedSecret []byte) {
 	return ahredSecretKey[:]
 }
 
-func CreateSharedSidhFp751(public []byte, private []byte) (sharedSecret []byte) {
-
-	privateKey := sidh.NewPrivateKey(sidhKeyId, sidhKeyVariantB)
-	e := privateKey.Generate(rand.Reader)
+func CreateSharedSidhFp751(public []byte, publicKeyVariant sidh.KeyVariant, private []byte, privateKeyVariant sidh.KeyVariant) (sharedSecret []byte) {
+	privateKey := sidh.NewPrivateKey(sidhKeyId, privateKeyVariant)
+	e := privateKey.Import(private)
 	if e != nil {
 		panic("Can't generate private key")
 	}
 
-	publicKey := sidh.NewPublicKey(sidhKeyId, sidhKeyVariantA)
+	publicKey := sidh.NewPublicKey(sidhKeyId, publicKeyVariant)
 	e = publicKey.Import(public)
 	if e != nil {
 		panic("Can't import public key")
@@ -84,4 +86,3 @@ func CreateSharedSidhFp751(public []byte, private []byte) (sharedSecret []byte) 
 
 	return ss[:]
 }
-

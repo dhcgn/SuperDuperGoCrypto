@@ -13,12 +13,13 @@ type Cargo struct {
 	Version    int
 	Ephemeral  KeyPairs
 	CipherText []byte
+	Nonce []byte
 }
 
 type KeyPairs struct {
 	Version int
-	Sike KeyPair
-	X448 KeyPair
+	Sike    KeyPair
+	X448    KeyPair
 }
 
 type KeyPair struct {
@@ -26,13 +27,25 @@ type KeyPair struct {
 	Private []byte
 }
 
-const(
+const (
 	sidhKeyVariantA = sidh.KeyVariantSidhA
-	sidhKeyVariantB  = sidh.KeyVariantSidhB
+	sidhKeyVariantB = sidh.KeyVariantSidhB
 	sidhKeyId       = sidh.Fp751
 )
 
 func main() {
+	/*
+	key ,_:=base64.StdEncoding.DecodeString("AN+NlMXQaj0RNQdyepZrGMXkIruN5ieP3satu1LP3YU=")
+	plain := []byte("Hello World!")
+
+	cipher, nonce := encrypt(key, plain)
+	encrypted := decrypt(key, cipher, nonce)
+
+	fmt.Println(string(cipher))
+	fmt.Println(string(encrypted))
+*/
+
+	//
 	flagCreateKeyPair := flag.Bool("GenerateKeyPair", false, "a bool")
 	flagCreatePublicKeyPair := flag.Bool("ExtractPublicKey", false, "a bool")
 
@@ -54,14 +67,14 @@ func main() {
 
 		if *flagCreateKeyAgreementPrivateKeyFile == "undef" {
 			fmt.Println(string(b))
-		}else{
+		} else {
 			ioutil.WriteFile(*flagCreateKeyAgreementPrivateKeyFile, b, 0644)
 		}
 		return
 	}
 
 	if *flagCreatePublicKeyPair {
-		user,_  := readKeyPairs(*flagCreateKeyAgreementPrivateKeyFile)
+		user, _ := readKeyPairs(*flagCreateKeyAgreementPrivateKeyFile)
 
 		user.Sike.Private = nil
 		user.X448.Private = nil
@@ -69,14 +82,14 @@ func main() {
 		b, _ := json.MarshalIndent(user, "", "    ")
 		if *flagCreateKeyAgreementPublicKeyFile == "undef" {
 			fmt.Println(string(b))
-		}else{
+		} else {
 			ioutil.WriteFile(*flagCreateKeyAgreementPublicKeyFile, b, 0644)
 		}
 		return
 	}
 
 	if *flagCreateKeyAgreement {
-		public,_  := readKeyPairs(*flagCreateKeyAgreementPublicKeyFile)
+		public, _ := readKeyPairs(*flagCreateKeyAgreementPublicKeyFile)
 		ephemeral, encoded := createKeyAgreementAndEphemeral(public)
 
 		b, _ := json.MarshalIndent(ephemeral, "", "    ")
@@ -87,16 +100,17 @@ func main() {
 	}
 
 	if *flagEncrypt {
-		public,_  := readKeyPairs(*flagCreateKeyAgreementPublicKeyFile)
+		public, _ := readKeyPairs(*flagCreateKeyAgreementPublicKeyFile)
 		ephemeral, sharedSecret := createKeyAgreementAndEphemeral(public)
 
 		plain, _ := ioutil.ReadFile(*flagPlainFile)
-		cipher := encrypt(sharedSecret, plain)
+		cipher ,nonce := encrypt(sharedSecret, plain)
 
 		cargo := Cargo{
 			Version:    0,
 			Ephemeral:  *ephemeral,
 			CipherText: cipher,
+			Nonce: nonce,
 		}
 
 		b, _ := json.MarshalIndent(cargo, "", "    ")
@@ -104,15 +118,14 @@ func main() {
 	}
 
 	if *flagDecrypt {
-		private,_  := readKeyPairs(*flagCreateKeyAgreementPrivateKeyFile)
+		private, _ := readKeyPairs(*flagCreateKeyAgreementPrivateKeyFile)
 
 		cipherData, _ := ioutil.ReadFile(*flagCipherFile)
 		var cargo Cargo
 		json.Unmarshal(cipherData, &cargo)
 
 		sharedSecret := createKeyAgreement(&cargo.Ephemeral, private)
-		plain := decrypt(sharedSecret, cipherData)
-		ioutil.WriteFile(*flagCipherFile, plain, 0644)
+		plain := decrypt(sharedSecret, cargo.CipherText, cargo.Nonce)
+		ioutil.WriteFile(*flagPlainFile, plain, 0644)
 	}
-
 }
