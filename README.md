@@ -2,7 +2,7 @@
 
 > NEVER never use this anywhere! Just for fun!
 
-Encryption with supersingular isogeny and X448 key exchange and ChaCha20-Poly1305 AEAD.
+Encryption with post-quantum cryptography safe supersingular isogeny and X448 key exchange and ChaCha20-Poly1305 AEAD for symmetric  encryption.
 
 ```powershell
 Set-Location C:\Dev\SuperDuperGoCrypto\debug
