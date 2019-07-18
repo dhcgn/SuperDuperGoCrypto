@@ -36,6 +36,11 @@ $env:GOPATH = $rootFolder
 
 Write-Host $env:GOPATH 
 
+Write-Progress -Activity "Install Packages"
+go get -u "github.com/cloudflare/circl/dh/sidh"
+go get -u "github.com/cloudflare/circl/dh/x448"
+go get -u "golang.org/x/crypto/chacha20poly1305"
+
 # Just uncomment the platfoms you don't need
 $platforms = @()
 $platforms += @{GOOS = "windows"; GOARCH = "amd64"; }
