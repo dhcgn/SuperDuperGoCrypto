@@ -23,23 +23,14 @@ if ((Get-Command Go -ErrorAction Ignore) -eq $null) {
 }
 
 $appName = "SuperDuperPQEncryption"
-$version = "1.0.0"
-$goCodeFile = "main.go"
+$version = "1.0.1"
+
 $publishFolder = "publish"
 $debugFolder = "debug"
 $compressPublish = $true
 
 $rootFolder = Split-Path -parent $PSCommandPath
 $upx = [System.IO.Path]::Combine($rootFolder, "build", "tools", "upx.exe" )
-
-$env:GOPATH = $rootFolder
-
-Write-Host $env:GOPATH 
-
-Write-Progress -Activity "Install Packages"
-go get -u "github.com/cloudflare/circl/dh/sidh"
-go get -u "github.com/cloudflare/circl/dh/x448"
-go get -u "golang.org/x/crypto/chacha20poly1305"
 
 # Just uncomment the platfoms you don't need
 $platforms = @()
@@ -79,13 +70,13 @@ foreach ($item in $platforms ) {
         $extension = $null
     }
         
-    $buildCode = (Join-Path -Path $rootFolder $goCodeFile)
+    $buildCode = (Join-Path -Path $rootFolder "src")
    
     $count += 1
     Write-Progress -Activity ("Build $($item.GOOS) $($item.GOARCH)") -Status "Build publish" -PercentComplete ([Double]$count / $maxCount * 100)
 
-    $buildOutput = ([System.IO.Path]::Combine( $rootFolder, "build", $publishFolder, ("{0}_{1}_{2}_{3}{4}" -f $appName, $version, $item.GOOS, $item.GOARCH, $extension)))
-    $executeExpression = "go build -ldflags ""-s -w -X main.version={0}"" -o {1}" -f $version, $buildOutput, $buildCode 
+    $buildOutput = ([System.IO.Path]::Combine( $rootFolder, "build", $publishFolder, ("{0}_{1}_{2}{3}" -f $appName, $item.GOOS, $item.GOARCH, $extension)))
+    $executeExpression = "go build -ldflags ""-s -w -X main.version={0}"" -trimpath -o {1} {2}" -f $version, $buildOutput, $buildCode 
     Write-Host "Execute", $executeExpression -ForegroundColor Green
     Invoke-Expression $executeExpression
 
@@ -106,8 +97,8 @@ foreach ($item in $platforms ) {
     $count += 1
     Write-Progress -Activity ("Build $($item.GOOS) $($item.GOARCH)") -Status "Build debug" -PercentComplete ([Double]$count / $maxCount * 100)
 
-    $buildOutput = ([System.IO.Path]::Combine( $rootFolder, "build", $debugFolder, ("{0}_{1}_{2}{3}{4}" -f $appName, $version,  $item.GOOS, $item.GOARCH, $extension)))
-    $executeExpression = "go build -ldflags ""-X main.version={0}"" -o {1}" -f $version, $buildOutput, $buildCode 
+    $buildOutput = ([System.IO.Path]::Combine( $rootFolder, "build", $debugFolder, ("{0}_{1}_{2}{3}" -f $appName, $item.GOOS, $item.GOARCH, $extension)))
+    $executeExpression = "go build -ldflags ""-X main.version={0}"" -o {1} {2}" -f $version, $buildOutput, $buildCode 
     Write-Host "Execute", $executeExpression -ForegroundColor Green
     Invoke-Expression $executeExpression
 
