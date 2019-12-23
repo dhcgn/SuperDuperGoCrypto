@@ -23,6 +23,10 @@ func decrypt(key []byte, cipher []byte, nonce []byte) (plain []byte) {
 	if err != nil {
 		log.Fatalln("Failed to decrypt or authenticate message:", err)
 	}
+
+	fmt.Println("plaintext: ", base64.StdEncoding.EncodeToString(plaintext), "base64")
+	fmt.Println("plaintext: ", string(plaintext), "utf8")
+
 	return plaintext
 }
 

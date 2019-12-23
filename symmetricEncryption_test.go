@@ -11,10 +11,10 @@ func Test_encrypt_decrypt(t *testing.T) {
 	plain := []byte("Hello World!")
 
 	cipher, nonce := encrypt(key, plain)
-	encrypted := decrypt(key, cipher, nonce)
+	decrypted := decrypt(key, cipher, nonce)
 
-	if !reflect.DeepEqual(cipher, encrypted){
-		t.Errorf("decrypt() = %v, want %v", string(cipher), string(encrypted))
+	if !reflect.DeepEqual(plain, decrypted){
+		t.Errorf("decrypt() = %v, want %v", string(plain), string(decrypted))
 	}
 
 }
