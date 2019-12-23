@@ -11,8 +11,6 @@ func createKeyAgreementAndEphemeral(public *KeyPairs) (*KeyPairs, []byte) {
 	privateEphemeral, _ := createKeyPairs(sidhKeyVariantB)
 	sharedX448 := CreateSharedX448(public.X448.Public, privateEphemeral.X448.Private)
 	sharedSidh := CreateSharedSidhFp751(public.Sike.Public, sidhKeyVariantA, privateEphemeral.Sike.Private, sidhKeyVariantB)
-	// fmt.Println("sharedX448", base64.StdEncoding.EncodeToString(sharedX448))
-	// fmt.Println("sharedSidh", base64.StdEncoding.EncodeToString(sharedSidh))
 	shared := CreateSharedKey(sharedX448, sharedSidh)
 	privateEphemeral.Sike.Private = nil
 	privateEphemeral.X448.Private = nil
@@ -22,8 +20,6 @@ func createKeyAgreementAndEphemeral(public *KeyPairs) (*KeyPairs, []byte) {
 func createKeyAgreement(ephemeral *KeyPairs, private *KeyPairs) []byte {
 	sharedX448 := CreateSharedX448(ephemeral.X448.Public, private.X448.Private)
 	sharedSidh := CreateSharedSidhFp751(ephemeral.Sike.Public, sidhKeyVariantB, private.Sike.Private, sidhKeyVariantA)
-	// fmt.Println("sharedX448", base64.StdEncoding.EncodeToString(sharedX448))
-	// fmt.Println("sharedSidh", base64.StdEncoding.EncodeToString(sharedSidh))
 	shared := CreateSharedKey(sharedX448, sharedSidh)
 	return shared
 }

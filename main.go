@@ -13,7 +13,7 @@ type Cargo struct {
 	Version    int
 	Ephemeral  KeyPairs
 	CipherText []byte
-	Nonce []byte
+	Nonce      []byte
 }
 
 type KeyPairs struct {
@@ -35,15 +35,15 @@ const (
 
 func main() {
 	/*
-	key ,_:=base64.StdEncoding.DecodeString("AN+NlMXQaj0RNQdyepZrGMXkIruN5ieP3satu1LP3YU=")
-	plain := []byte("Hello World!")
+		key ,_:=base64.StdEncoding.DecodeString("AN+NlMXQaj0RNQdyepZrGMXkIruN5ieP3satu1LP3YU=")
+		plain := []byte("Hello World!")
 
-	cipher, nonce := encrypt(key, plain)
-	encrypted := decrypt(key, cipher, nonce)
+		cipher, nonce := encrypt(key, plain)
+		encrypted := decrypt(key, cipher, nonce)
 
-	fmt.Println(string(cipher))
-	fmt.Println(string(encrypted))
-*/
+		fmt.Println(string(cipher))
+		fmt.Println(string(encrypted))
+	*/
 
 	//
 	flagCreateKeyPair := flag.Bool("GenerateKeyPair", false, "a bool")
@@ -104,13 +104,13 @@ func main() {
 		ephemeral, sharedSecret := createKeyAgreementAndEphemeral(public)
 
 		plain, _ := ioutil.ReadFile(*flagPlainFile)
-		cipher ,nonce := encrypt(sharedSecret, plain)
+		cipher, nonce := encrypt(sharedSecret, plain)
 
 		cargo := Cargo{
 			Version:    0,
 			Ephemeral:  *ephemeral,
 			CipherText: cipher,
-			Nonce: nonce,
+			Nonce:      nonce,
 		}
 
 		b, _ := json.MarshalIndent(cargo, "", "    ")
