@@ -32,6 +32,7 @@ jobs:
   test:
     <<: *defaults
     steps:
+    - run: ls -r *
     - restore_cache:
         keys:
         - workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
