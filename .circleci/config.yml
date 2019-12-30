@@ -1,8 +1,30 @@
 version: 2.1
+
+defaults: &defaults
+  docker:
+  - image: golang:stretch
+  working_directory: /workspace
+  environment:
+    GOPATH: /
+    GOCACHE: /.cache/go-build
+    GO111MODULE: "on"
+
 jobs:
-  build:
-    docker: 
-      - image: circleci/golang:1.13 # the primary container, where your job's commands are run
+  setup-build:
+    <<: *defaults
     steps:
-      - checkout # check out the code in the project directory
-      - run: echo "hello world" # run the `echo` command
+    - run: go env
+    - checkout
+    - restore_cache:
+        keys:
+        - go-module-cache-v1-{{ checksum "/workspace/src/go.sum" }}
+        - go-module-cache-v1-
+    - run: go mod download
+    - save_cache:
+        key: go-module-cache-v1-{{ checksum "/workspace/src/go.sum" }}
+        paths:
+        - /pkg/mod/cache
+    - save_cache:
+        key: workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
+        paths:
+        - /workspace/src
