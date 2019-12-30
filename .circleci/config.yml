@@ -32,7 +32,8 @@ jobs:
   test:
     <<: *defaults
     steps:
-    - run: ls -r
+    - run: ls /workspace
+    - run: ls /
     - run: pwd
     - restore_cache:
         keys:
