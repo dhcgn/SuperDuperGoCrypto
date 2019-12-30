@@ -28,12 +28,12 @@ jobs:
     - save_cache:
         key: workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
         paths:
-        - /workspace
+        - /workspace/src
 
   test:
     <<: *defaults
     steps:
-    - checkout
+    # - checkout
     - run: ls /workspace
     - run: ls /workspace/src
     - restore_cache:
