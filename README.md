@@ -2,6 +2,8 @@
 
 > NEVER never use this anywhere! Just for fun!
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/dhcgn/SuperDuperGoCrypto)](https://goreportcard.com/report/github.com/dhcgn/SuperDuperGoCrypto)
+
 Encryption with post-quantum cryptography safe supersingular isogeny and X448 key exchange and ChaCha20-Poly1305 AEAD for symmetric  encryption.
 
 ```powershell
