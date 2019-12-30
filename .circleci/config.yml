@@ -1,4 +1,4 @@
-version: 2.1
+version: 2
 
 defaults: &defaults
   docker:
@@ -27,4 +27,34 @@ jobs:
     - save_cache:
         key: workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
         paths:
-        - /workspace/src
+        - /workspace
+
+  test:
+    <<: *defaults
+    steps:
+    - restore_cache:
+        keys:
+        - workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
+    - restore_cache:
+        keys:
+        - go-module-cache-v1-{{ checksum "/workspace/src/go.sum" }}
+        - go-module-cache-v1-
+    - restore_cache:
+        keys:
+        - go-build-cache-v1-{{ .Branch }}-{{ .Revision }}
+        - go-build-cache-v1-{{ .Branch }}
+        - go-build-cache-v1
+    - run: go test -v ./...
+    - save_cache:
+        key: go-build-cache-v1-{{ .Branch }}-{{ .Revision }}
+        paths:
+        - /.cache/go-build
+
+workflows:
+  version: 2
+  test:
+    jobs:
+    - setup-build
+    - test:
+        requires:
+        - setup-build
