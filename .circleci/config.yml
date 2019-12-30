@@ -35,7 +35,7 @@ jobs:
     steps:
     # - checkout
     - run: ls /workspace
-    - run: ls /workspace/src
+    # - run: ls /workspace/src
     - restore_cache:
         keys:
         - workspace-v1-{{ .Environment.CIRCLE_SHA1 }}
@@ -48,6 +48,7 @@ jobs:
         - go-build-cache-v1-{{ .Branch }}-{{ .Revision }}
         - go-build-cache-v1-{{ .Branch }}
         - go-build-cache-v1
+    - run: ls /workspace
     - run: cd src && go test -v ./...
     - save_cache:
         key: go-build-cache-v1-{{ .Branch }}-{{ .Revision }}
